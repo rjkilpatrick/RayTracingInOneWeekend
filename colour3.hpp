@@ -1,7 +1,7 @@
 #ifndef COLOUR3_H
 #define COLOUR3_H
 
-#include "vec3.h"
+#include "vec3.hpp"
 
 #include <iostream>
 

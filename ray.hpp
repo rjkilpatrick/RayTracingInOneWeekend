@@ -1,13 +1,13 @@
 #ifndef RAY_H
 #define RAY_H
 
-#include "vec3.h"
+#include "vec3.hpp"
 
-// Rays are defined parametricallly via $\vec{P}(\lambda) = \lambda\vec{b} + \vec{A}$
+// Rays are defined parametricallly via $\vec{P}(\t) = t\vec{b} + \vec{A}$
 // Which is the extension of $y = mx + c$ to 3-vectors
 // $\vec{A}$ is the point of origin of the ray
 // $\vec{b}$ is ray direction vector
-// $\lambda$ parameterises the ray across the ray direction vector ($\vec{b}$)
+// $\t$ parameterises the ray across the ray direction vector ($\vec{b}$)
 
 class ray {
 public:
@@ -17,9 +17,9 @@ public:
     point3 origin() const { return orig; }
     vec3 direction() const { return dir; }
 
-    // Point along the ray at given lambda
-    point3 at(double lambda) const {
-        return (lambda * dir) + orig;
+    // Point along the ray at given t
+    point3 at(double t) const {
+        return (t * dir) + orig;
     }
 private:
     point3 orig;
