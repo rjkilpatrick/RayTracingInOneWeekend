@@ -3,8 +3,12 @@
 
 #include "vec3.h"
 
-// Rays are defined parametricallly via $$\vec{Y}(\lambda) = \lambda\vec{X} + \vec{c}$$
-// Which is the extension of $$y = mx + c$$ to 3-vectors
+// Rays are defined parametricallly via $\vec{P}(\lambda) = \lambda\vec{b} + \vec{A}$
+// Which is the extension of $y = mx + c$ to 3-vectors
+// $\vec{A}$ is the point of origin of the ray
+// $\vec{b}$ is ray direction vector
+// $\lambda$ parameterises the ray across the ray direction vector ($\vec{b}$)
+
 class ray {
 public:
     ray() {}
@@ -17,7 +21,7 @@ public:
     point3 at(double lambda) const {
         return (lambda * dir) + orig;
     }
-public:
+private:
     point3 orig;
     vec3 dir;
 };
