@@ -48,7 +48,14 @@ public:
         return ((e[0] * e[0]) + (e[1] * e[1]) + (e[2] * e[2]));
     }
 
+    inline static vec3 random() {
+        return vec3(random_double(), random_double(), random_double());
+    }
 
+    inline static vec3 random(double min, double max) {
+        return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
+    }
+    
 public:
     double e[3]; // Components of the vector, not to be confused with basis
 };
@@ -114,6 +121,14 @@ inline vec3 cross(const vec3 &u, const vec3 &v) {
 
 inline vec3 unit_vector(vec3 u) {
     return u / u.length();
+}
+
+// Returns a random unit vector with a lambertian distribution
+vec3 lambertian_unit_vector() {
+    auto a = random_double(0, 2 * M_PI);
+    auto z = random_double(-1, 1);
+    auto r = std::sqrt(1 - z * z);
+    return vec3(r * cos(a), r * sin(a), z);
 }
 
 #endif

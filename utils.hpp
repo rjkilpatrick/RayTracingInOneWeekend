@@ -22,13 +22,15 @@ inline double radians_to_degrees(double radians) {
     return radians * 180.0 / M_PI;
 }
 
+// Returns a random double in the interval [0, 1]
 inline double random_double() {
-    // Returns a random double in the interval [0, 1)
     static std::uniform_real_distribution<double> distribution(0.0, 1.0);
     static std::mt19937_64 generator;
     return distribution(generator);
 }
 
+
+// Returns a random double in the interval [min, max]
 inline double random_double(double min, double max) {
     return min + (max - min) * random_double();
 }

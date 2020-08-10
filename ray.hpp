@@ -3,8 +3,8 @@
 
 #include "vec3.hpp"
 
-// Rays are defined parametricallly via $\vec{P}(\t) = t\vec{b} + \vec{A}$
-// Which is the extension of $y = mx + c$ to 3-vectors
+// Rays are defined parametricallly via $\vec{P}(\vec{b} ; t) = t\vec{b} + \vec{A}$
+// Which is the extension of the 1-D $y(x ; m) = mx + c$ to 3-vectors
 // $\vec{A}$ is the point of origin of the ray
 // $\vec{b}$ is ray direction vector
 // $\t$ parameterises the ray across the ray direction vector ($\vec{b}$)
