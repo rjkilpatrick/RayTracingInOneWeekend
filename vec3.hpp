@@ -123,12 +123,28 @@ inline vec3 unit_vector(vec3 u) {
     return u / u.length();
 }
 
+vec3 random_in_unit_sphere() {
+    // TODO: Implement a better algorithm
+    while (true) {
+        auto u = vec3::random();
+        if (u.length_squared() > 1) {
+            continue;
+        }
+        return u;
+    }
+}
+
 // Returns a random unit vector with a lambertian distribution
 vec3 lambertian_unit_vector() {
     auto a = random_double(0, 2 * M_PI);
     auto z = random_double(-1, 1);
     auto r = std::sqrt(1 - z * z);
     return vec3(r * cos(a), r * sin(a), z);
+}
+
+// Reflects u about unit normal n
+vec3 reflect(const vec3& u, const vec3& n) {
+    return u - (2 * dot(u, n) * n);
 }
 
 #endif

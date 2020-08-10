@@ -4,6 +4,7 @@
 #include "hittable_list.hpp"
 #include "sphere.hpp"
 #include "camera.hpp"
+#include "material.hpp"
 
 #include <iostream>
 
@@ -17,8 +18,12 @@ colour3 ray_colour(const ray& r, const hittable& world, int bounces_remaining) {
     const double EPSILON = 0.001; // The amount a ray must be in front of the object
 
     if (world.hit(r, EPSILON, infinity, rec)) {
-        point3 target = rec.p + rec.normal + lambertian_unit_vector();
-        return 0.5 * ray_colour(ray(rec.p, target - rec.p), world, bounces_remaining -1);
+        ray scattered; // New ray generated
+        colour3 attenuation;
+        if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+            return attenuation * ray_colour(scattered, world, bounces_remaining - 1);
+        }
+        return colour3(0, 0, 0);
     }
 
     vec3 unit_direction = unit_vector(r.direction());
@@ -40,8 +45,17 @@ int main() {
     // World
 
     hittable_list world;
-    world.add(std::make_shared<sphere>(point3(0, 0, -1), 0.5));
-    world.add(std::make_shared<sphere>(point3(0, -100.5, -1), 100));
+
+    auto material_ground = std::make_shared<lambertian>(colour3(.8, .8, 0));
+    auto material_centre = std::make_shared<lambertian>(colour3(.7, .3, .3));
+    auto material_left = std::make_shared<metal>(colour3(.8, .8, 0.8), 0.3);
+    auto material_right = std::make_shared<metal>(colour3(.8, .6, 0.2), 1);
+
+    world.add(std::make_shared<sphere>(point3(0, -100.5, -1), 100, material_ground));
+    world.add(std::make_shared<sphere>(point3(0, -0, -1), .5, material_centre));
+    world.add(std::make_shared<sphere>(point3(-1, -0, -1), .5, material_left));
+    world.add(std::make_shared<sphere>(point3(1, -0, -1), .5, material_right));
+
 
     // Camera
 
