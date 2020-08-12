@@ -1,10 +1,10 @@
 #include "utils.hpp"
 
+#include "camera.hpp"
 #include "colour3.hpp"
 #include "hittable_list.hpp"
-#include "sphere.hpp"
-#include "camera.hpp"
 #include "material.hpp"
+#include "sphere.hpp"
 
 #include <iostream>
 
@@ -15,13 +15,15 @@ colour3 ray_colour(const ray& r, const hittable& world, int bounces_remaining) {
 
     hit_record rec;
 
-    const double EPSILON = 0.001; // The amount a ray must be in front of the object
+    const double EPSILON =
+        0.001; // The amount a ray must be in front of the object
 
     if (world.hit(r, EPSILON, infinity, rec)) {
         ray scattered; // New ray generated
         colour3 attenuation;
         if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
-            return attenuation * ray_colour(scattered, world, bounces_remaining - 1);
+            return attenuation *
+                   ray_colour(scattered, world, bounces_remaining - 1);
         }
         return colour3(0, 0, 0);
     }
@@ -34,7 +36,7 @@ colour3 ray_colour(const ray& r, const hittable& world, int bounces_remaining) {
 // Generates an image in PPM Image Format
 // Prints output to stdout
 int main() {
-    
+
     // Image
 
     const auto aspect_ratio = 16.0 / 9.0;
@@ -51,16 +53,23 @@ int main() {
     auto material_left = std::make_shared<dielectric>(1.5);
     auto material_right = std::make_shared<metal>(colour3(0.8, 0.6, 0.2), 0.0);
 
-    world.add(std::make_shared<sphere>(point3(0, -100.5, -1), 100, material_ground));
+    world.add(
+        std::make_shared<sphere>(point3(0, -100.5, -1), 100, material_ground));
     world.add(std::make_shared<sphere>(point3(0, 0, -1), 0.5, material_centre));
     world.add(std::make_shared<sphere>(point3(-1, 0, -1), 0.5, material_left));
-    world.add(std::make_shared<sphere>(point3(-1, 0, -1), -0.45, material_left));
+    world.add(
+        std::make_shared<sphere>(point3(-1, 0, -1), -0.45, material_left));
     world.add(std::make_shared<sphere>(point3(1, 0, -1), 0.5, material_right));
 
-
     // Camera
+    point3 look_from{3, 3, 2};
+    point3 look_to{0, 0, -1};
+    vec3 UP{0, 1, 0};
+    auto aperture = 2.0;
+    auto dist_to_focus = (look_from - look_to).length();
 
-    camera cam{point3(-2, 2, 1), point3(0, 0, -1), vec3(0, 1, 0), 20, aspect_ratio};
+    camera cam{look_from,    look_to,  UP,           20,
+               aspect_ratio, aperture, dist_to_focus};
 
     // Render
 
@@ -71,7 +80,7 @@ int main() {
     for (int j = image_height - 1; j >= 0; --j) {
         std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
         for (int i = 0; i < image_width; ++i) {
-            colour3 pixel_colour {0, 0, 0};
+            colour3 pixel_colour{0, 0, 0};
             for (int s = 0; s < samples_per_pixel; ++s) {
                 auto u = double(i + random_double()) / (image_width - 1);
                 auto v = double(j + random_double()) / (image_height - 1);

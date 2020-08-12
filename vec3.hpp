@@ -123,6 +123,18 @@ inline vec3 unit_vector(vec3 u) {
     return u / u.length();
 }
 
+vec3 random_in_unit_disk() {
+    // TODO: Implement a better algorithm
+    while (true) {
+        auto u = vec3::random(-1, 1);
+        u.e[2] = 0;
+        if (u.length_squared() > 1) {
+            continue;
+        }
+        return u;
+    }
+}
+
 vec3 random_in_unit_sphere() {
     // TODO: Implement a better algorithm
     while (true) {
