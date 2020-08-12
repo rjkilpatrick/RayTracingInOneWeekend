@@ -1,11 +1,13 @@
 #ifndef COLOUR3_H
 #define COLOUR3_H
 
+#include "utils.hpp"
 #include "vec3.hpp"
 
 #include <iostream>
 
-void write_colour(std::ostream &out, colour3 pixel_colour, int samples_per_pixel) {
+void write_colour(std::ostream& out, colour3 pixel_colour,
+                  int samples_per_pixel) {
     auto r = pixel_colour.x();
     auto b = pixel_colour.y();
     auto g = pixel_colour.z();
