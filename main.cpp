@@ -8,6 +8,62 @@
 
 #include <iostream>
 
+hittable_list random_scene() {
+    hittable_list world;
+
+    auto ground_material = std::make_shared<lambertian>(colour3(0.5, 0.5, 0.5));
+    world.add(
+        std::make_shared<sphere>(point3(0, -1000.5, 0), 1000, ground_material));
+
+    // Draw 484 small spheres approximating a grid
+    for (int j = -11; j < 11; ++j) {
+        for (int i = -11; i < 11; ++i) {
+            auto material_distribution = random_double();
+            point3 sphere_centre{i + 0.9 * random_double(), 0.2,
+                                 j + 0.9 * random_double()};
+
+            if ((sphere_centre - point3{4, 0.2, 0}).length() > 0.9) {
+                std::shared_ptr<material> sphere_material;
+
+                if (material_distribution < 0.8) {
+                    // Lambertian
+                    auto albedo =
+                        colour3::random() *
+                        colour3::random(); // What does this do to the
+                                           // probability distributions
+                    sphere_material = std::make_shared<lambertian>(albedo);
+                    world.add(std::make_shared<sphere>(sphere_centre, 0.2,
+                                                       sphere_material));
+                } else if (material_distribution < 0.95) {
+                    // Metal
+                    auto albedo = colour3::random(0.5, 1);
+                    auto fuzz = random_double(0, 0.5);
+                    sphere_material = std::make_shared<metal>(albedo, fuzz);
+                    world.add(
+                        std::make_shared<sphere>(sphere_centre, 0.2, sphere_material));
+                } else {
+                    // Glass
+                    sphere_material = std::make_shared<dielectric>(1.5);
+                    world.add(std::make_shared<sphere>(sphere_centre, 0.2,
+                                                       sphere_material));
+                }
+            }
+        }
+    }
+
+    // Draw big spheres
+    auto material1 = std::make_shared<dielectric>(1.5);
+    world.add(std::make_shared<sphere>(point3{0, 1, 0}, 1.0, material1));
+
+    auto material2 = std::make_shared<lambertian>(colour3{0.4, 0.2, 0.1});
+    world.add(std::make_shared<sphere>(point3{-4, 1, 0}, 1.0, material2));
+
+    auto material3 = std::make_shared<metal>(colour3{0.7, 0.6, 0.5}, 0.0);
+    world.add(std::make_shared<sphere>(point3{4, 1, 0}, 1.0, material3));
+
+    return world;
+}
+
 colour3 ray_colour(const ray& r, const hittable& world, int bounces_remaining) {
     if (bounces_remaining <= 0) {
         return colour3(0, 0, 0);
@@ -40,40 +96,27 @@ int main() {
     // Image
 
     const auto aspect_ratio = 16.0 / 9.0;
-    const int image_width = 400;
+    const int image_width = 1200;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const int samples_per_pixel = 10;
+    const int samples_per_pixel = 5;
 
     // World
 
-    hittable_list world;
-
-    auto material_ground = std::make_shared<lambertian>(colour3(0.8, 0.8, 0.0));
-    auto material_centre = std::make_shared<lambertian>(colour3(0.1, 0.2, 0.5));
-    auto material_left = std::make_shared<dielectric>(1.5);
-    auto material_right = std::make_shared<metal>(colour3(0.8, 0.6, 0.2), 0.0);
-
-    world.add(
-        std::make_shared<sphere>(point3(0, -100.5, -1), 100, material_ground));
-    world.add(std::make_shared<sphere>(point3(0, 0, -1), 0.5, material_centre));
-    world.add(std::make_shared<sphere>(point3(-1, 0, -1), 0.5, material_left));
-    world.add(
-        std::make_shared<sphere>(point3(-1, 0, -1), -0.45, material_left));
-    world.add(std::make_shared<sphere>(point3(1, 0, -1), 0.5, material_right));
+    auto world = random_scene();
 
     // Camera
-    point3 look_from{3, 3, 2};
-    point3 look_to{0, 0, -1};
+    point3 look_from{13, 2, 3};
+    point3 look_to{0, 0, 0};
     vec3 UP{0, 1, 0};
-    auto aperture = 2.0;
-    auto dist_to_focus = (look_from - look_to).length();
+    auto aperture = 0.1;
+    auto dist_to_focus = 10.0;
 
     camera cam{look_from,    look_to,  UP,           20,
                aspect_ratio, aperture, dist_to_focus};
 
     // Render
 
-    const int max_bounces = 50;
+    const int max_bounces = 6;
 
     std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
