@@ -40,7 +40,7 @@ public:
 
     // Euclidean norm of vector
     double length() const {
-        return std::sqrt(length_squared());
+        return sqrt(length_squared());
     }
 
     // Computes the dot product with respect to itself, using euclidean norm
@@ -62,7 +62,7 @@ public:
 
 // Type aliases for vec3
 using point3 = vec3; // Point in 3-dimensional space
-using colour3 = vec3; // rgb colour TODO: Clip to [0,1)
+using colour3 = vec3; // rgb colour
 
 
 
@@ -101,7 +101,7 @@ inline vec3 operator*(const vec3 &u, double t) {
     return t * u;
 }
 
-inline vec3 operator/(const vec3 u, double t) {
+inline vec3 operator/(vec3 u, double t) {
     return (1 / t) * u;
 }
 
@@ -126,7 +126,7 @@ inline vec3 unit_vector(vec3 u) {
 vec3 random_in_unit_sphere() {
     // TODO: Implement a better algorithm
     while (true) {
-        auto u = vec3::random();
+        auto u = vec3::random(-1, 1);
         if (u.length_squared() > 1) {
             continue;
         }
@@ -145,6 +145,14 @@ vec3 lambertian_unit_vector() {
 // Reflects u about unit normal n
 vec3 reflect(const vec3& u, const vec3& n) {
     return u - (2 * dot(u, n) * n);
+}
+
+// Refracts about a normal
+vec3 refract(const vec3& incident, const vec3& normal, double eta_i_over_eta_r) {
+    auto cos_theta = fmin(dot(-incident, normal), 1.0);
+    vec3 r_out_perp =  eta_i_over_eta_r * (incident + cos_theta * normal);
+    vec3 r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.length_squared())) * normal;
+    return r_out_perp + r_out_parallel;
 }
 
 #endif

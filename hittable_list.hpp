@@ -1,6 +1,7 @@
 #ifndef HITTABLE_LIST_H
 #define HITTABLE_LIST_H
 
+#include "utils.hpp"
 #include "hittable.hpp"
 
 #include <memory>
@@ -16,14 +17,14 @@ public:
 
     virtual bool hit(const ray& r, double tmin, double tmax, hit_record& rec) const override;
 
-private:
+public:
     std::vector<std::shared_ptr<hittable>> objects;
 };
 
-bool hittable_list::hit(const ray&r, double tmin, double tmax, hit_record& rec) const {
+bool hittable_list::hit(const ray&r, double tmin, double tmax, hit_record& rec)const {
     hit_record temp_rec;
     bool hit_anything = false;
-    auto closest_so_far = tmax;
+    auto closest_so_far = tmax; // The lowest value of t so far
 
     for (const auto& object : objects) {
         if (object->hit(r, tmin, closest_so_far, temp_rec)) {

@@ -17,10 +17,12 @@ public:
         lower_left_corner = origin - (horizontal / 2) - (vertical / 2)
                            - vec3(0, 0, focal_length);
     }
-
+    
+    // Get ray from camera centre to U, V screen co-ordinates
     ray get_ray(double u, double v) const {
         return ray(origin, lower_left_corner + (u * horizontal) + (v * vertical) - origin);
     }
+
 private:
     point3 origin;
     point3 lower_left_corner;
