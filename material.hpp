@@ -3,6 +3,7 @@
 
 #include "hittable.hpp"
 #include "utils.hpp"
+#include "texture.hpp"
 
 // Uses the Schick approximation for a dielectric
 double schlick(double cosine, double ior) {
@@ -19,7 +20,8 @@ public:
 
 class lambertian : public material {
 public:
-    lambertian(const colour3& a) : albedo(a) {}
+    lambertian(const colour3& a) : albedo(std::make_shared<solid_colour>(a)) {}
+    lambertian(std::shared_ptr<texture> a) : albedo(a) {};
 
     // Does scatter
     virtual bool scatter(const ray& r_in, const hit_record& rec,
@@ -28,12 +30,12 @@ public:
 
         vec3 scatter_direction = rec.normal + lambertian_unit_vector();
         scattered = ray(rec.p, scatter_direction, r_in.time());
-        attenuation = albedo;
+        attenuation = albedo->value(rec.u, rec.v, rec.p);
         return true;
     }
 
 public:
-    colour3 albedo;
+    std::shared_ptr<texture> albedo;
 };
 
 class metal : public material {

@@ -7,7 +7,7 @@ class camera {
 public:
     camera(point3 look_from, // Camera position
            point3 look_to,   // Camera look towards
-           vec3 up,
+           vec3 up, // Vertical unit vector
            double vfov, // FOV in degrees
            double aspect_ratio, double aperture,
            double focus_distance, // Radius of focus, instead of focal length

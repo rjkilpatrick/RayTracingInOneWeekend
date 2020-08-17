@@ -4,6 +4,15 @@
 #include "hittable.hpp"
 #include "vec3.hpp"
 
+void get_sphere_uv(const point3& p, double& u, double& v) {
+    ///\f$u = \frac{\phi}{2\pi}\f$
+    ///\f$v = \frac{\theta}{\pi}\f$
+    auto phi = atan2(p.z(), p.x());
+    auto theta = asin(p.y());
+    u = 1 - (phi + M_PI) / (2 * M_PI);
+    v = (theta + M_PI_2) / M_PI;
+}
+
 class sphere : public hittable {
 public:
     sphere() {}
@@ -40,6 +49,7 @@ bool sphere::hit(const ray& r, double t_min, double t_max,
             rec.p = r.at(rec.t);
             vec3 outward_normal = (rec.p - centre) / radius;
             rec.set_face_normal(r, outward_normal);
+            get_sphere_uv((rec.p - centre) / radius, rec.u, rec.v);
             rec.mat_ptr = mat_ptr;
             return true;
         }
@@ -51,6 +61,7 @@ bool sphere::hit(const ray& r, double t_min, double t_max,
             rec.p = r.at(rec.t);
             vec3 outward_normal = (rec.p - centre) / radius;
             rec.set_face_normal(r, outward_normal);
+            get_sphere_uv((rec.p - centre) / radius, rec.u, rec.v);
             rec.mat_ptr = mat_ptr;
             return true;
         }
