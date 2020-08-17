@@ -10,8 +10,8 @@ public:
            vec3 up,
            double vfov, // FOV in degrees
            double aspect_ratio, double aperture,
-           double focus_distance // Radius of focus, instead of focal length
-    ) {
+           double focus_distance, // Radius of focus, instead of focal length
+           double t0 = 0, double t1 = 0) {
         auto theta = degrees_to_radians(vfov);
         auto h = tan(theta / 2);
         auto viewport_height = 2.0 * h;
@@ -28,6 +28,9 @@ public:
             origin - (horizontal / 2) - (vertical / 2) - (focus_distance * w);
 
         lens_radius = aperture / 2;
+
+        t_open = t0;
+        t_close = t1;
     }
 
     // Get ray from camera centre to s, t screen co-ordinates
@@ -35,8 +38,10 @@ public:
         vec3 rd = lens_radius * random_in_unit_disk();
         vec3 offset = u * rd; // Component-wise multiplication //FIXME
 
-        return ray(origin + offset, lower_left_corner + (s * horizontal) +
-                                        (t * vertical) - offset - origin);
+        return ray{origin + offset,
+                   lower_left_corner + (s * horizontal) + (t * vertical) -
+                       offset - origin,
+                   random_double(t_open, t_close)};
     }
 
 private:
@@ -46,6 +51,7 @@ private:
     vec3 vertical;
     vec3 u, v, w;
     double lens_radius;
+    double t_open, t_close; // Shutter open / close times
 };
 
 #endif

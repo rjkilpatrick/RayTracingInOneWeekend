@@ -4,6 +4,7 @@
 #include "colour3.hpp"
 #include "hittable_list.hpp"
 #include "material.hpp"
+#include "moving_sphere.hpp"
 #include "sphere.hpp"
 
 #include <iostream>
@@ -32,8 +33,9 @@ hittable_list random_scene() {
                         colour3::random(); // What does this do to the
                                            // probability distributions
                     sphere_material = std::make_shared<lambertian>(albedo);
-                    world.add(std::make_shared<sphere>(sphere_centre, 0.2,
-                                                       sphere_material));
+
+                    auto end_point = sphere_centre + vec3(0, random_double(0, 0.5), 0);
+                    world.add(std::make_shared<moving_sphere>(sphere_centre, end_point, 0.0, 1.0, 0.2, sphere_material));
                 } else if (material_distribution < 0.95) {
                     // Metal
                     auto albedo = colour3::random(0.5, 1);

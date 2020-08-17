@@ -1,12 +1,11 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include "utils.hpp"
 #include "hittable.hpp"
-
+#include "utils.hpp"
 
 // Uses the Schick approximation for a dielectric
-double schlick (double cosine, double ior) {
+double schlick(double cosine, double ior) {
     auto r0 = (1 - ior) / (1 + ior);
     r0 = r0 * r0;
     return r0 + (1 - r0) * pow((1 - cosine), 5);
@@ -14,7 +13,8 @@ double schlick (double cosine, double ior) {
 
 class material {
 public:
-    virtual bool scatter(const ray& r_in, const hit_record& rec, colour3& attenuation, ray& scattered) const = 0;
+    virtual bool scatter(const ray& r_in, const hit_record& rec,
+                         colour3& attenuation, ray& scattered) const = 0;
 };
 
 class lambertian : public material {
@@ -22,11 +22,12 @@ public:
     lambertian(const colour3& a) : albedo(a) {}
     
     // Does scatter
-    virtual bool scatter(const ray& r_in, const hit_record& rec, colour3& attenuation, ray& scattered) const override {
+    virtual bool scatter(const ray& r_in, const hit_record& rec,
+                         colour3& attenuation, ray& scattered) const override {
         // Returns a random unit vector with a lambertian distribution
         
         vec3 scatter_direction = rec.normal + lambertian_unit_vector();
-        scattered = ray(rec.p, scatter_direction);
+        scattered = ray(rec.p, scatter_direction, r_in.time());
         attenuation = albedo;
         return true;
     }
