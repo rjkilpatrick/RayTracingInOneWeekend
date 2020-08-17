@@ -35,14 +35,17 @@ hittable_list random_scene() {
                     sphere_material = std::make_shared<lambertian>(albedo);
 
                     auto end_point = sphere_centre + vec3(0, random_double(0, 0.5), 0);
+                    
+                    // world.add(std::make_shared<sphere>(sphere_centre, 0.2,
+                    //                                    sphere_material));
                     world.add(std::make_shared<moving_sphere>(sphere_centre, end_point, 0.0, 1.0, 0.2, sphere_material));
                 } else if (material_distribution < 0.95) {
                     // Metal
                     auto albedo = colour3::random(0.5, 1);
                     auto fuzz = random_double(0, 0.5);
                     sphere_material = std::make_shared<metal>(albedo, fuzz);
-                    world.add(
-                        std::make_shared<sphere>(sphere_centre, 0.2, sphere_material));
+                    world.add(std::make_shared<sphere>(sphere_centre, 0.2,
+                                                       sphere_material));
                 } else {
                     // Glass
                     sphere_material = std::make_shared<dielectric>(1.5);
@@ -73,9 +76,6 @@ colour3 ray_colour(const ray& r, const hittable& world, int bounces_remaining) {
 
     hit_record rec;
 
-    const double EPSILON =
-        0.001; // The amount a ray must be in front of the object
-
     if (world.hit(r, EPSILON, infinity, rec)) {
         ray scattered; // New ray generated
         colour3 attenuation;
@@ -98,9 +98,10 @@ int main() {
     // Image
 
     const auto aspect_ratio = 16.0 / 9.0;
-    const int image_width = 1200;
+    const int image_width = 400;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const int samples_per_pixel = 5;
+    const int samples_per_pixel = 100;
+    const int max_bounces = 50;
 
     // World
 
@@ -113,12 +114,10 @@ int main() {
     auto aperture = 0.1;
     auto dist_to_focus = 10.0;
 
-    camera cam{look_from,    look_to,  UP,           20,
-               aspect_ratio, aperture, dist_to_focus};
+    camera cam{look_from, look_to,       UP,  20, aspect_ratio,
+               aperture,  dist_to_focus, 0.0, 0.0};
 
     // Render
-
-    const int max_bounces = 6;
 
     std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 

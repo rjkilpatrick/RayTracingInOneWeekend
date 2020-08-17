@@ -34,12 +34,34 @@ inline double random_double(double min, double max) {
     return min + (max - min) * random_double();
 }
 
+// Return an int in range [min, max]
+inline int random_int(int min, int max) {
+    return static_cast<int>(random_double(min, max + 1));
+}
+
 inline double clamp(double x, double min, double max) {
     if (x < min)
         return min;
     if (x > max)
         return max;
     return x;
+}
+
+const double EPSILON = 1e-3; // The smallest amount of distance
+
+/**
+ * @brief Returns sign of a number
+ * 
+ * +1 for positive values, -1 for negative values and 0 for (or less than \c EPSILON ).
+ * @param x To determine sign of
+ * @return int +1, 0, or -1 depending on sign of \c val 
+ */
+inline int sign(double x) {
+    if (std::abs(x) < EPSILON)
+        return 0;
+    if (x < 0)
+        return -1;
+    return 1;
 }
 
 // Common headers

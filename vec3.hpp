@@ -156,4 +156,12 @@ vec3 refract(const vec3& incident, const vec3& normal,
     return r_out_perp + r_out_parallel;
 }
 
+vec3 fmin(const vec3& u, const vec3& v) {
+    return vec3{fmin(u.x(), v.x()), fmin(u.y(), v.y()), fmin(u.z(), v.z())};
+}
+
+vec3 fmax(const vec3& u, const vec3& v) {
+    return vec3{fmax(u.x(), v.x()), fmax(u.y(), v.y()), fmax(u.z(), v.z())};
+}
+
 #endif
