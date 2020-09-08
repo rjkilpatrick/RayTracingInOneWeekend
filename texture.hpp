@@ -56,7 +56,10 @@ public:
     noise_texture(double sf) : scale(sf){};
 
     virtual colour3 value(double u, double v, const point3& p) const override {
-        return colour3(1, 1, 1) * noise.noise(scale * p);
+        // return colour3(1, 1, 1) * 0.5 * (1.0 + noise.noise(scale * p));
+        // return colour3(1, 1, 1) * noise.turb(scale * p);
+        return colour3(1, 1, 1) * 0.5 *
+               (1 + sin(scale * p.z() + 10 * noise.turb(p)));
     }
 
 private:
