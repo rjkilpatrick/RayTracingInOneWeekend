@@ -1,6 +1,7 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
+#include "perlin.hpp"
 #include "utils.hpp"
 
 class texture {
@@ -47,6 +48,20 @@ public:
 public:
     std::shared_ptr<texture> odd;
     std::shared_ptr<texture> even;
+};
+
+class noise_texture : public texture {
+public:
+    noise_texture() {}
+    noise_texture(double sf) : scale(sf){};
+
+    virtual colour3 value(double u, double v, const point3& p) const override {
+        return colour3(1, 1, 1) * noise.noise(scale * p);
+    }
+
+private:
+    perlin noise;
+    double scale;
 };
 
 #endif

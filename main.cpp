@@ -7,8 +7,19 @@
 #include "moving_sphere.hpp"
 #include "sphere.hpp"
 #include "texture.hpp"
+#include "vec3.hpp"
 
 #include <iostream>
+
+hittable_list two_perlin_spheres() {
+    hittable_list objects;
+
+    auto pertext = std::make_shared<noise_texture>(4);
+    objects.add(std::make_shared<sphere>(point3(0, -1000, 0), 1000, std::make_shared<lambertian>(pertext)));
+    objects.add(std::make_shared<sphere>(point3(0, 2, 0), 2, std::make_shared<lambertian>(pertext)));
+
+    return objects;
+}
 
 hittable_list random_scene() {
     hittable_list world;
@@ -138,8 +149,14 @@ int main() {
         aperture = 0.1;
         break;
     case 2:
-    default:
         world = two_spheres();
+        look_from = point3(13, 2, 3);
+        look_to = point3(0, 0, 0);
+        fov = 20.0;
+        break;
+    case 3:
+    default:
+        world = two_perlin_spheres();
         look_from = point3(13, 2, 3);
         look_to = point3(0, 0, 0);
         fov = 20.0;
