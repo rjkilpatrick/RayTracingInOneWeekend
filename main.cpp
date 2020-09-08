@@ -11,6 +11,14 @@
 
 #include <iostream>
 
+hittable_list earth() {
+    auto earth_texture = std::make_shared<image_texture>("./img/earthmap.jpg");
+    auto earth_surface = std::make_shared<lambertian>(earth_texture);
+    auto globe = std::make_shared<sphere>(point3(0, 0, 0), 2, earth_surface);
+
+    return hittable_list(globe);
+}
+
 hittable_list two_perlin_spheres() {
     hittable_list objects;
 
@@ -125,7 +133,9 @@ colour3 ray_colour(const ray& r, const hittable& world, int bounces_remaining) {
 // Prints output to stdout
 int main() {
 
-    // Image
+    stbi_set_flip_vertically_on_load(true);  
+
+    // Image out
 
     const auto aspect_ratio = 16.0 / 9.0;
     const int image_width = 400;
@@ -155,13 +165,20 @@ int main() {
         fov = 20.0;
         break;
     case 3:
-    default:
         world = two_perlin_spheres();
         look_from = point3(13, 2, 3);
         look_to = point3(0, 0, 0);
         fov = 20.0;
         break;
+    case 4:
+    default:
+        world = earth();
+        look_from = point3(13, 2, 3);
+        look_to = point3(0, 0, 0);
+        fov = 20.0;
+        break;
     }
+    
 
     // Camera
     vec3 UP{0, 1, 0};
