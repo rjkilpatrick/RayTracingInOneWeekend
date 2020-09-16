@@ -1,5 +1,6 @@
 #include "utils.hpp"
 
+#include "aarect.hpp"
 #include "camera.hpp"
 #include "colour3.hpp"
 #include "hittable_list.hpp"
@@ -10,6 +11,23 @@
 #include "vec3.hpp"
 
 #include <iostream>
+
+hittable_list simple_light() {
+    hittable_list objects;
+
+    auto perlin_tex = std::make_shared<noise_texture>(4);
+    objects.add(std::make_shared<sphere>(
+        point3{0, -1000, 0}, 1000, std::make_shared<lambertian>(perlin_tex)));
+    objects.add(std::make_shared<sphere>(
+        point3{0, 2, 0}, 2, std::make_shared<lambertian>(perlin_tex)));
+
+    auto diff_light = std::make_shared<diffuse_light>(colour3{4, 4, 4});
+    objects.add(std::make_shared<xy_rect>(3, 5, 1, 3, -2, diff_light));
+
+    objects.add(std::make_shared<sphere>(point3{0, 8, 0}, 2, diff_light));
+
+    return objects;
+}
 
 hittable_list earth() {
     auto earth_texture = std::make_shared<image_texture>("./img/earthmap.jpg");
@@ -23,8 +41,10 @@ hittable_list two_perlin_spheres() {
     hittable_list objects;
 
     auto pertext = std::make_shared<noise_texture>(4);
-    objects.add(std::make_shared<sphere>(point3(0, -1000, 0), 1000, std::make_shared<lambertian>(pertext)));
-    objects.add(std::make_shared<sphere>(point3(0, 2, 0), 2, std::make_shared<lambertian>(pertext)));
+    objects.add(std::make_shared<sphere>(
+        point3(0, -1000, 0), 1000, std::make_shared<lambertian>(pertext)));
+    objects.add(std::make_shared<sphere>(
+        point3(0, 2, 0), 2, std::make_shared<lambertian>(pertext)));
 
     return objects;
 }
@@ -107,40 +127,43 @@ hittable_list two_spheres() {
     return objects;
 }
 
-colour3 ray_colour(const ray& r, const hittable& world, int bounces_remaining) {
+colour3 ray_colour(const ray& r, const colour3& background,
+                   const hittable& world, int bounces_remaining) {
+    // Can't bounce anymore!
     if (bounces_remaining <= 0) {
         return colour3(0, 0, 0);
     }
 
     hit_record rec;
 
-    if (world.hit(r, EPSILON, infinity, rec)) {
-        ray scattered; // New ray generated
-        colour3 attenuation;
-        if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
-            return attenuation *
-                   ray_colour(scattered, world, bounces_remaining - 1);
-        }
-        return colour3(0, 0, 0);
+    if (!world.hit(r, EPSILON, infinity, rec)) {
+        return background;
     }
 
-    vec3 unit_direction = unit_vector(r.direction());
-    auto t = 0.5 * (unit_direction.y() + 1.0);
-    return (1.0 - t) * colour3(1.0, 1.0, 1.0) + (t * colour3(0.5, 0.7, 1.0));
+    ray scattered; // New ray generated
+    colour3 attenuation;
+    colour3 emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
+
+    if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+        return emitted;
+    }
+
+    return emitted + attenuation * ray_colour(scattered, background, world,
+                                              bounces_remaining - 1);
 }
 
 // Generates an image in PPM Image Format
 // Prints output to stdout
 int main() {
 
-    stbi_set_flip_vertically_on_load(true);  
+    stbi_set_flip_vertically_on_load(true);
 
     // Image out
 
     const auto aspect_ratio = 16.0 / 9.0;
     const int image_width = 400;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const int samples_per_pixel = 100;
+    int samples_per_pixel = 100;
     const int max_bounces = 50;
 
     // World
@@ -150,35 +173,47 @@ int main() {
     point3 look_to;
     auto fov = 40.0;
     auto aperture = 0.0;
+    colour3 background{0, 0, 0};
 
     switch (0) {
     case 1:
         world = random_scene();
+        background = colour3{0.7, 0.8, 1.0};
         look_from = point3(13, 2, 3);
         fov = 20.0;
         aperture = 0.1;
         break;
     case 2:
         world = two_spheres();
+        background = colour3{0.7, 0.8, 1.0};
         look_from = point3(13, 2, 3);
         look_to = point3(0, 0, 0);
         fov = 20.0;
         break;
     case 3:
         world = two_perlin_spheres();
+        background = colour3{0.7, 0.8, 1.0};
         look_from = point3(13, 2, 3);
         look_to = point3(0, 0, 0);
         fov = 20.0;
         break;
     case 4:
-    default:
         world = earth();
+        background = colour3{0.7, 0.8, 1.0};
         look_from = point3(13, 2, 3);
         look_to = point3(0, 0, 0);
         fov = 20.0;
         break;
+    case 5:
+    default:
+        world = simple_light();
+        background = colour3{0., 0., 0.};
+        samples_per_pixel = 400;
+        look_from = point3{26, 3, 6};
+        look_to = point3{0, 2, 0};
+        fov = 20.;
+        break;
     }
-    
 
     // Camera
     vec3 UP{0, 1, 0};
@@ -199,7 +234,7 @@ int main() {
                 auto u = double(i + random_double()) / (image_width - 1);
                 auto v = double(j + random_double()) / (image_height - 1);
                 ray r = cam.get_ray(u, v);
-                pixel_colour += ray_colour(r, world, max_bounces);
+                pixel_colour += ray_colour(r, background, world, max_bounces);
             }
 
             write_colour(std::cout, pixel_colour, samples_per_pixel);

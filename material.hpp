@@ -2,8 +2,9 @@
 #define MATERIAL_H
 
 #include "hittable.hpp"
-#include "utils.hpp"
 #include "texture.hpp"
+#include "utils.hpp"
+#include "vec3.hpp"
 
 // Uses the Schick approximation for a dielectric
 double schlick(double cosine, double ior) {
@@ -14,6 +15,11 @@ double schlick(double cosine, double ior) {
 
 class material {
 public:
+    // All materials emit "black" unless otherwise spoken for
+    virtual colour3 emitted(double u, double v, const point3& p) const {
+        return colour3(0, 0, 0);
+    }
+
     virtual bool scatter(const ray& r_in, const hit_record& rec,
                          colour3& attenuation, ray& scattered) const = 0;
 };
@@ -21,7 +27,7 @@ public:
 class lambertian : public material {
 public:
     lambertian(const colour3& a) : albedo(std::make_shared<solid_colour>(a)) {}
-    lambertian(std::shared_ptr<texture> a) : albedo(a) {};
+    lambertian(std::shared_ptr<texture> a) : albedo(a){};
 
     // Does scatter
     virtual bool scatter(const ray& r_in, const hit_record& rec,
@@ -103,6 +109,24 @@ public:
 
 private:
     colour3 albedo;
+};
+
+class diffuse_light : public material {
+public:
+    diffuse_light(std::shared_ptr<texture> a) : emit(a){};
+    diffuse_light(colour3 c) : emit(std::make_shared<solid_colour>(c)){};
+
+    virtual bool scatter(const ray& r_in, const hit_record& rec,
+                         colour3& attenuation, ray& scattered) const override {
+        return false;
+    }
+
+    virtual colour3 emitted(double u, double v, const point3& p) const override {
+        return emit->value(u, v, p);
+    }
+
+public:
+    std::shared_ptr<texture> emit;
 };
 
 #endif
