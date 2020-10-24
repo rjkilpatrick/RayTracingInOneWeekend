@@ -11,18 +11,42 @@
 #include "vec3.hpp"
 
 #include <iostream>
+#include <memory>
+
+hittable_list cornell_box() {
+    hittable_list objects;
+
+    auto red = std::make_shared<lambertian>(colour3{0.65, 0.05, 0.05});
+    auto white = std::make_shared<lambertian>(colour3{0.73, 0.73, 0.73});
+    auto green = std::make_shared<lambertian>(colour3{0.12, 0.45, 0.15});
+    auto light = std::make_shared<diffuse_light>(colour3{15, 15, 15});
+
+    // Make Cornell box
+    objects.add(std::make_shared<yz_rect>(0, 555, 0, 555, 555, green));
+    objects.add(std::make_shared<yz_rect>(0, 555, 0, 555, 0, red));
+    objects.add(std::make_shared<xz_rect>(213, 343, 227, 332, 554, light));
+    objects.add(std::make_shared<xz_rect>(0, 555, 0, 555, 0, white));
+    objects.add(std::make_shared<xz_rect>(0, 555, 0, 555, 555, white));
+    objects.add(std::make_shared<xy_rect>(0, 555, 0, 555, 555, white));
+
+    return objects;
+}
 
 hittable_list simple_light() {
     hittable_list objects;
 
     auto perlin_tex = std::make_shared<noise_texture>(4);
+    // Make "floor"
     objects.add(std::make_shared<sphere>(
         point3{0, -1000, 0}, 1000, std::make_shared<lambertian>(perlin_tex)));
+    // Make main sphere
     objects.add(std::make_shared<sphere>(
         point3{0, 2, 0}, 2, std::make_shared<lambertian>(perlin_tex)));
 
     auto diff_light = std::make_shared<diffuse_light>(colour3{4, 4, 4});
-    objects.add(std::make_shared<xy_rect>(3, 5, 1, 3, -2, diff_light));
+    // objects.add(std::make_shared<xy_rect>(3, 5, 1, 3, -2, diff_light));
+    // objects.add(std::make_shared<xy_rect>(3, 5, 1, 3, -2, diff_light));
+    objects.add(std::make_shared<yz_rect>(-3, -3, -3, 3, -2, diff_light));
 
     objects.add(std::make_shared<sphere>(point3{0, 8, 0}, 2, diff_light));
 
@@ -158,13 +182,11 @@ int main() {
 
     stbi_set_flip_vertically_on_load(true);
 
-    // Image out
-
-    const auto aspect_ratio = 16.0 / 9.0;
-    const int image_width = 400;
-    const int image_height = static_cast<int>(image_width / aspect_ratio);
+    // Image default values
+    auto aspect_ratio = 16.0 / 9.0;
+    int image_width = 400;
     int samples_per_pixel = 100;
-    const int max_bounces = 50;
+    int max_bounces = 50;
 
     // World
 
@@ -205,7 +227,6 @@ int main() {
         fov = 20.0;
         break;
     case 5:
-    default:
         world = simple_light();
         background = colour3{0., 0., 0.};
         samples_per_pixel = 400;
@@ -213,11 +234,23 @@ int main() {
         look_to = point3{0, 2, 0};
         fov = 20.;
         break;
+    case 6:
+    default:
+        world = cornell_box();
+        aspect_ratio = 1.0;
+        image_width = 300;
+        samples_per_pixel = 200;
+        background = colour3{0, 0, 0};
+        look_from = point3{278, 278, -800};
+        look_to = point3{278, 278, 0};
+        fov = 40.0;
+        break;
     }
 
     // Camera
     vec3 UP{0, 1, 0};
     auto dist_to_focus = 10.0;
+    int image_height = static_cast<int>(image_width / aspect_ratio);
 
     camera cam{look_from, look_to,       UP,  fov, aspect_ratio,
                aperture,  dist_to_focus, 0.0, 0.0};

@@ -6,18 +6,13 @@
 #include "utils.hpp"
 #include "vec3.hpp"
 
-// Uses the Schick approximation for a dielectric
-double schlick(double cosine, double ior) {
-    auto r0 = (1 - ior) / (1 + ior);
-    r0 = r0 * r0;
-    return r0 + (1 - r0) * pow((1 - cosine), 5);
-}
+double schlick(double cosine, double ior);
 
 class material {
 public:
     // All materials emit "black" unless otherwise spoken for
     virtual colour3 emitted(double u, double v, const point3& p) const {
-        return colour3(0, 0, 0);
+        return colour3{0, 0, 0};
     }
 
     virtual bool scatter(const ray& r_in, const hit_record& rec,
@@ -121,12 +116,20 @@ public:
         return false;
     }
 
-    virtual colour3 emitted(double u, double v, const point3& p) const override {
+    virtual colour3 emitted(double u, double v,
+                            const point3& p) const override {
         return emit->value(u, v, p);
     }
 
 public:
     std::shared_ptr<texture> emit;
 };
+
+// Uses the Schick approximation for a dielectric
+double schlick(double cosine, double ior) {
+    auto r0 = (1 - ior) / (1 + ior);
+    r0 = r0 * r0;
+    return r0 + (1 - r0) * pow((1 - cosine), 5);
+}
 
 #endif
